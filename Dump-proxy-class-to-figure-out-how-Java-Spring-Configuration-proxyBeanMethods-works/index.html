@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="IntroductionWhen you use @Configuration annotation in a class, this class will be regarded as a configuration Class and you could declare several @Bean methods here.It comes with an optional argument">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dump proxy class to figure out how Java Spring Configuration proxyBeanMethods works">
+<meta property="og:url" content="http://example.com/Dump-proxy-class-to-figure-out-how-Java-Spring-Configuration-proxyBeanMethods-works/index.html">
+<meta property="og:site_name" content="Wizdzz&#39;s Blog">
+<meta property="og:description" content="IntroductionWhen you use @Configuration annotation in a class, this class will be regarded as a configuration Class and you could declare several @Bean methods here.It comes with an optional argument">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/pictures/testConfigurationProxyMethod.png">
+<meta property="og:image" content="http://example.com/pictures/testConfigurationProxyMethodFalse.png">
+<meta property="og:image" content="http://example.com/pictures/dumpProxyClass.png">
+<meta property="og:image" content="http://example.com/pictures/singletonObjects.png">
+<meta property="og:image" content="http://example.com/pictures/proxyClassConstructorMsg.png">
+<meta property="og:image" content="http://example.com/pictures/originalClassConstructorMsg.png">
+<meta property="article:published_time" content="2023-09-30T23:21:04.000Z">
+<meta property="article:modified_time" content="2023-10-03T02:00:08.050Z">
+<meta property="article:author" content="Wizdzz">
+<meta property="article:tag" content="Java Spring">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/pictures/testConfigurationProxyMethod.png">
+
+
+<link rel="canonical" href="http://example.com/Dump-proxy-class-to-figure-out-how-Java-Spring-Configuration-proxyBeanMethods-works/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/Dump-proxy-class-to-figure-out-how-Java-Spring-Configuration-proxyBeanMethods-works/","path":"Dump-proxy-class-to-figure-out-how-Java-Spring-Configuration-proxyBeanMethods-works/","title":"Dump proxy class to figure out how Java Spring Configuration proxyBeanMethods works"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Dump proxy class to figure out how Java Spring Configuration proxyBeanMethods works | Wizdzz's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Wizdzz's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Dump-proxy-class-from-memory"><span class="nav-number">2.</span> <span class="nav-text">Dump proxy class from memory</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Analyze-proxy-class"><span class="nav-number">3.</span> <span class="nav-text">Analyze proxy class</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Component-or-Configuration-proxyBeanMethods-false-will-not-generate-proxy-class"><span class="nav-number">4.</span> <span class="nav-text">@Component or @Configuration(proxyBeanMethods &#x3D; false) will not generate proxy class</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Wizdzz</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wizdzz" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;wizdzz" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/Dump-proxy-class-to-figure-out-how-Java-Spring-Configuration-proxyBeanMethods-works/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Wizdzz">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Wizdzz's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Dump proxy class to figure out how Java Spring Configuration proxyBeanMethods works | Wizdzz's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Dump proxy class to figure out how Java Spring Configuration proxyBeanMethods works
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2023-09-30 16:21:04" itemprop="dateCreated datePublished" datetime="2023-09-30T16:21:04-07:00">2023-09-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2023-10-02 19:00:08" itemprop="dateModified" datetime="2023-10-02T19:00:08-07:00">2023-10-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Backend-Development/" itemprop="url" rel="index"><span itemprop="name">Backend Development</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><p>When you use <code>@Configuration</code> annotation in a class, this class will be regarded as a configuration Class and you could declare several <code>@Bean</code> methods here.<br>It comes with an optional argument of “proxyBeanMethods” and the default value of it is ‘true’.<br>The official document states:</p>
+<blockquote>
+<p>Specify whether @Bean methods should get proxied in order to enforce bean lifecycle behavior, e.g.</p>
+</blockquote>
+<p>If we got such a class like this:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration()</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestConfig</span> &#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">logger</span> <span class="operator">=</span> LoggerFactory.getLogger(getClass());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">TestConfig</span><span class="params">()</span>&#123;</span><br><span class="line">        logger.info(<span class="string">&quot;TestConfig constructor&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> Demo <span class="title function_">demo</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Demo</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> DemoFactory <span class="title function_">demoFactory</span><span class="params">()</span> &#123;</span><br><span class="line">        DemoFactory demoFactory= <span class="keyword">new</span> <span class="title class_">DemoFactory</span>();</span><br><span class="line">        demoFactory.setDemo(</span><br><span class="line">                demo());</span><br><span class="line">        <span class="keyword">return</span> demoFactory;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>We will always get the same <code>Demo</code> class instance whether we request Bean or call <code>demo()</code> method directly.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// test code</span></span><br><span class="line"><span class="type">ConfigurableApplicationContext</span> <span class="variable">run</span> <span class="operator">=</span> SpringApplication.run(Application.class, args);</span><br><span class="line"><span class="type">TestConfig</span> <span class="variable">testConfig</span> <span class="operator">=</span> run.getBean(TestConfig.class);</span><br><span class="line">DemoFactory demoFactory= run.getBean(DemoFactory.class);</span><br><span class="line"><span class="type">Demo</span> <span class="variable">demo1</span> <span class="operator">=</span> run.getBean(Demo.class);</span><br><span class="line">System.out.println(<span class="string">&quot;demo from TestConfig: &quot;</span> + testConfig.demo().hashCode());</span><br><span class="line">System.out.println(<span class="string">&quot;demo from demoFactory: &quot;</span> + demoFactory.getDemo().hashCode());</span><br><span class="line">System.out.println(<span class="string">&quot;demo from call directly: &quot;</span> + demo1.hashCode());</span><br></pre></td></tr></table></figure>
+<p>The output is:<br><img src="/./pictures/testConfigurationProxyMethod.png" alt="testConfigurationProxyMethod!"></p>
+<p>But if we set <code>proxyBeanMethods</code> to false, we will get different instances of <code>Demo</code> class.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration(proxyBeanMethods = false)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestConfig</span> &#123;</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+<p>The output is:<br><img src="/./pictures/testConfigurationProxyMethodFalse.png" alt="testConfigurationProxyMethodFalse!"></p>
+<p>So, how does it work to let us get the singleton instance in different way?</p>
+<h1 id="Dump-proxy-class-from-memory"><a href="#Dump-proxy-class-from-memory" class="headerlink" title="Dump proxy class from memory"></a>Dump proxy class from memory</h1><p>We know that Spring will create a proxy class for the configuration class and the name of the proxy class would be like <code>xxx$$SpringCGLIB$$0</code>.<br>I have researched that where is the generated proxy class located and the result is nowhere COZ it is generated in memory.<br>I have to dump the proxy class from memory now.<br>At first, I tried to use the memory tool in Intellij IDEA but it only has limited simple features.<br>Then I tried to use Java Agent, well, there is exactly a existed project called <a target="_blank" rel="noopener" href="https://github.com/apangin/class-file-extractor"><code>class-file-extractor</code></a> states it could do that, but I somehow got could no find Agent like error message.<br>Finally, I found this class from the clue in stackoverflow:  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DefaultGeneratorStrategy</span> <span class="keyword">implements</span> <span class="title class_">GeneratorStrategy</span> &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">public</span> <span class="type">byte</span>[] generate(ClassGenerator cg) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">      <span class="type">DebuggingClassWriter</span> <span class="variable">cw</span> <span class="operator">=</span> <span class="built_in">this</span>.getClassVisitor();</span><br><span class="line">      <span class="built_in">this</span>.transform(cg).generateClass(cw);</span><br><span class="line">      <span class="keyword">return</span> <span class="built_in">this</span>.transform(cw.toByteArray());</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">protected</span> <span class="type">byte</span>[] transform(<span class="type">byte</span>[] b) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">      <span class="keyword">return</span> b;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>It seems that I could set a breakpoint in <code>transform</code> method and write the byte array to a file.<br><img src="/./pictures/dumpProxyClass.png" alt="dumpProxyClass!"></p>
+<h1 id="Analyze-proxy-class"><a href="#Analyze-proxy-class" class="headerlink" title="Analyze proxy class"></a>Analyze proxy class</h1><p>Use <code>Jadx</code> to decompile the proxy class and navigate to the proxied method <code>demo()</code>:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> Demo <span class="title function_">demo</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">MethodInterceptor</span> <span class="variable">methodInterceptor</span> <span class="operator">=</span> <span class="built_in">this</span>.CGLIB$CALLBACK_0;</span><br><span class="line">    <span class="keyword">if</span> (methodInterceptor == <span class="literal">null</span>) &#123;</span><br><span class="line">        CGLIB$BIND_CALLBACKS(<span class="built_in">this</span>);</span><br><span class="line">        methodInterceptor = <span class="built_in">this</span>.CGLIB$CALLBACK_0;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> methodInterceptor != <span class="literal">null</span> ? (Demo) methodInterceptor.intercept(<span class="built_in">this</span>, CGLIB$demo$<span class="number">1</span>$Method, CGLIB$emptyArgs, CGLIB$demo$<span class="number">1</span>$Proxy) : <span class="built_in">super</span>.demo();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>It looks so straightforward, the proxy class will intercept the proxied method.<br>Let’s figure out how it “intercept”.<br>I set a breakpoint in the line of calling <code>demo()</code> method in <code>public DemoFactory demoFactory()</code>.<br>Step into, come to here:  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">BeanMethodInterceptor</span> <span class="keyword">implements</span> <span class="title class_">MethodInterceptor</span>, ConditionalCallback &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">this</span>.resolveBeanReference(beanMethod, beanMethodArgs, beanFactory, beanName);</span><br></pre></td></tr></table></figure>
+<p>Step into:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> Object <span class="title function_">resolveBeanReference</span><span class="params">(Method beanMethod, Object[] beanMethodArgs, ConfigurableBeanFactory beanFactory, String beanName)</span> &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="type">Object</span> <span class="variable">beanInstance</span> <span class="operator">=</span> useArgs ? beanFactory.getBean(beanName, beanMethodArgs) : beanFactory.getBean(beanName);</span><br></pre></td></tr></table></figure>
+<p>…<br>Continue step into, will finally come to here:  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DefaultSingletonBeanRegistry</span> <span class="keyword">extends</span> <span class="title class_">SimpleAliasRegistry</span> <span class="keyword">implements</span> <span class="title class_">SingletonBeanRegistry</span> &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="meta">@Nullable</span></span><br><span class="line">    <span class="keyword">protected</span> Object <span class="title function_">getSingleton</span><span class="params">(String beanName, <span class="type">boolean</span> allowEarlyReference)</span> &#123;</span><br><span class="line">        <span class="type">Object</span> <span class="variable">singletonObject</span> <span class="operator">=</span> <span class="built_in">this</span>.singletonObjects.get(beanName);</span><br></pre></td></tr></table></figure>
+<p>Noticed that <code>singletonObjects</code> is exactly the HashMap of storing all beans:<br><img src="/./pictures/singletonObjects.png" alt="singletonObjects!"></p>
+<p>Ok, then it gets and returns the stored bean directly.</p>
+<h1 id="Component-or-Configuration-proxyBeanMethods-false-will-not-generate-proxy-class"><a href="#Component-or-Configuration-proxyBeanMethods-false-will-not-generate-proxy-class" class="headerlink" title="@Component or @Configuration(proxyBeanMethods = false) will not generate proxy class"></a><code>@Component</code> or <code>@Configuration(proxyBeanMethods = false)</code> will not generate proxy class</h1><p>In fact, if we change the annotation to <code>@Component</code> or <code>@Configuration(proxyBeanMethods = false)</code>, it will not generate a proxy class, we could notice from the printed message in constructor.<br><img src="/./pictures/proxyClassConstructorMsg.png" alt="proxyClassConstructorMsg"></p>
+<center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Proxy Class Constructor Message</center>  
+<br>
+<br>
+
+<p><img src="/./pictures/originalClassConstructorMsg.png" alt="originalClassConstructorMsg"></p>
+<center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Original Class Constructor Message</center> 
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java-Spring/" rel="tag"># Java Spring</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/lldb%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" rel="prev" title="LLDB 常用命令">
+                  <i class="fa fa-angle-left"></i> LLDB 常用命令
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/How-Spring-AutoConfigure-Datasource/" rel="next" title="How Spring AutoConfigure Datasource">
+                  How Spring AutoConfigure Datasource <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Wizdzz</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

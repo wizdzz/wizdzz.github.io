@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Windows lldb 下载：https:&#x2F;&#x2F;github.com&#x2F;vadimcn&#x2F;llvm&#x2F;releases&#x2F;download&#x2F;r313613&#x2F;LLVM-6.0.0-r313613-win32.exe (link does not work anymore, find it by yourself) 启动 server（Android studio 调试过 so 之后会在 &#x2F;data">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LLDB 常用命令">
+<meta property="og:url" content="http://example.com/lldb%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="Wizdzz&#39;s Blog">
+<meta property="og:description" content="Windows lldb 下载：https:&#x2F;&#x2F;github.com&#x2F;vadimcn&#x2F;llvm&#x2F;releases&#x2F;download&#x2F;r313613&#x2F;LLVM-6.0.0-r313613-win32.exe (link does not work anymore, find it by yourself) 启动 server（Android studio 调试过 so 之后会在 &#x2F;data">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-09-30T21:54:37.550Z">
+<meta property="article:modified_time" content="2023-10-03T00:35:19.900Z">
+<meta property="article:author" content="Wizdzz">
+<meta property="article:tag" content="Reverse Engineering">
+<meta property="article:tag" content="Debugging">
+<meta property="article:tag" content="LLDB">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/lldb%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/lldb%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/","path":"lldb常用命令/","title":"LLDB 常用命令"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>LLDB 常用命令 | Wizdzz's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Wizdzz's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8-server%EF%BC%88Android-studio-%E8%B0%83%E8%AF%95%E8%BF%87-so-%E4%B9%8B%E5%90%8E%E4%BC%9A%E5%9C%A8-data-data-app-%E7%9B%AE%E5%BD%95%E4%B8%AD%E7%94%9F%E6%88%90-server%EF%BC%8C%E4%BC%BC%E4%B9%8E-data-local-tmp-%E7%9B%AE%E5%BD%95%E4%B8%8B%E4%B9%9F%E4%BC%9A%E7%94%9F%E6%88%90%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">启动 server（Android studio 调试过 so 之后会在 &#x2F;data&#x2F;data&#x2F;app 目录中生成 server，似乎 &#x2F;data&#x2F;local&#x2F;tmp 目录下也会生成）:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">端口转发：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%89%E6%8B%A9-platform-%E8%BF%9E%E6%8E%A5-server"><span class="nav-number">3.</span> <span class="nav-text">选择 platform, 连接 server:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Attach-%E8%BF%9B%E7%A8%8B%EF%BC%88%E9%A6%96%E6%AC%A1%E9%99%84%E5%8A%A0%E5%8F%AF%E8%83%BD%E4%BC%9A%E5%8D%A1%E9%A1%BF%E5%BE%88%E4%B9%85%EF%BC%8C%E5%9B%A0%E4%B8%BA%E5%A4%8D%E5%88%B6-so-%E5%88%B0%E6%9C%AC%E5%9C%B0%E6%88%96%E8%80%85%E4%BC%A0%E6%96%87%E4%BB%B6%EF%BC%89%EF%BC%9A"><span class="nav-number">4.</span> <span class="nav-text">Attach 进程（首次附加可能会卡顿很久，因为复制 so 到本地或者传文件）：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E5%85%B3%E9%94%AE%E5%AD%97%E7%9B%B8%E5%85%B3%E7%9A%84%E5%91%BD%E4%BB%A4-%E8%AE%BE%E7%BD%AE%EF%BC%9A"><span class="nav-number">5.</span> <span class="nav-text">查找关键字相关的命令&#x2F;设置：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%AD%E7%82%B9%E5%88%97%E8%A1%A8%EF%BC%9A"><span class="nav-number">6.</span> <span class="nav-text">断点列表：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E6%96%AD%E7%82%B9-thumb-%E6%8C%87%E4%BB%A4%E6%97%B6%E7%9B%AE%E6%A0%87%E5%9C%B0%E5%9D%80%E9%9C%80%E8%A6%81%E5%8A%A0%E4%B8%80-%EF%BC%9A"><span class="nav-number">7.</span> <span class="nav-text">地址断点 (thumb 指令时目标地址需要加一)：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E5%90%8D%E6%96%AD%E7%82%B9%EF%BC%9A"><span class="nav-number">8.</span> <span class="nav-text">方法名断点：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%99%E6%96%AD%E7%82%B9%E6%B7%BB%E5%8A%A0%E5%91%BD%E4%BB%A4%EF%BC%9A"><span class="nav-number">9.</span> <span class="nav-text">给断点添加命令：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E6%96%AD%E7%82%B9%EF%BC%88%E5%BE%88%E5%8D%A1%EF%BC%8C%E4%B8%8D%E5%A5%BD%E4%BD%BF%EF%BC%89"><span class="nav-number">10.</span> <span class="nav-text">条件断点（很卡，不好使）:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%96%AD%E7%82%B9-%E5%8D%B3%E4%BD%BF%E7%9B%B8%E5%90%8C%E7%A1%AC%E4%BB%B6%EF%BC%8C%E6%9C%89%E4%BA%9B%E5%86%85%E6%A0%B8%E7%89%88%E6%9C%AC%E5%8F%AF%E8%83%BD%E5%AF%BC%E8%87%B4%E6%96%AD%E7%82%B9%E6%97%A0%E6%95%88-%EF%BC%9A"><span class="nav-number">11.</span> <span class="nav-text">内存断点(即使相同硬件，有些内核版本可能导致断点无效)：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%EF%BC%9A"><span class="nav-number">12.</span> <span class="nav-text">寄存器：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%86%85%E5%AD%98%EF%BC%9A"><span class="nav-number">13.</span> <span class="nav-text">查看内存：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%86%85%E5%AD%98%EF%BC%9A"><span class="nav-number">14.</span> <span class="nav-text">写内存：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E6%B1%87%E7%BC%96%E4%BB%A3%E7%A0%81%EF%BC%9A"><span class="nav-number">15.</span> <span class="nav-text">显示汇编代码：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E6%AD%A5%EF%BC%9A"><span class="nav-number">16.</span> <span class="nav-text">单步：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%88%B0%E8%BF%94%E5%9B%9E%EF%BC%9A"><span class="nav-number">17.</span> <span class="nav-text">执行到返回：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%88%97%E8%A1%A8%EF%BC%9A"><span class="nav-number">18.</span> <span class="nav-text">模块列表：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B7%B3%E8%BF%87-8-%E5%AD%97%E8%8A%82%EF%BC%9A"><span class="nav-number">19.</span> <span class="nav-text">跳过 8 字节：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%BA%E5%88%B6%E4%B8%AD%E6%96%AD%EF%BC%9A"><span class="nav-number">20.</span> <span class="nav-text">强制中断：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%9C%B0%E5%9D%80%E4%BF%A1%E6%81%AF-%E7%9B%B8%E5%AF%B9%E6%A8%A1%E5%9D%97%E7%9A%84%E5%81%8F%E7%A7%BB-%EF%BC%9A"><span class="nav-number">21.</span> <span class="nav-text">查看地址信息 (相对模块的偏移)：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E5%86%85%E5%AD%98%E5%88%B0%E6%96%87%E4%BB%B6%EF%BC%9A"><span class="nav-number">22.</span> <span class="nav-text">读取内存到文件：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0-lldbinit-%E6%96%87%E4%BB%B6%EF%BC%9A"><span class="nav-number">23.</span> <span class="nav-text">添加 .lldbinit 文件：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lldbinit"><span class="nav-number">24.</span> <span class="nav-text">.lldbinit</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E4%BF%9D%E5%AD%98%E7%9A%84%E6%96%AD%E7%82%B9%E6%96%87%E4%BB%B6"><span class="nav-number">25.</span> <span class="nav-text">读取保存的断点文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8-dlsym-%E4%B8%8B%E6%96%AD"><span class="nav-number">26.</span> <span class="nav-text">在 dlsym 下断</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Wizdzz</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wizdzz" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;wizdzz" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/lldb%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Wizdzz">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Wizdzz's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="LLDB 常用命令 | Wizdzz's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LLDB 常用命令
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2023-09-30 14:54:37" itemprop="dateCreated datePublished" datetime="2023-09-30T14:54:37-07:00">2023-09-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2023-10-02 17:35:19" itemprop="dateModified" datetime="2023-10-02T17:35:19-07:00">2023-10-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Reverse-Engineering/" itemprop="url" rel="index"><span itemprop="name">Reverse Engineering</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Windows lldb 下载：<br><a target="_blank" rel="noopener" href="https://github.com/vadimcn/llvm/releases/download/r313613/LLVM-6.0.0-r313613-win32.exe">https://github.com/vadimcn/llvm/releases/download/r313613/LLVM-6.0.0-r313613-win32.exe</a> (link does not work anymore, find it by yourself)</p>
+<h2 id="启动-server（Android-studio-调试过-so-之后会在-data-data-app-目录中生成-server，似乎-data-local-tmp-目录下也会生成）"><a href="#启动-server（Android-studio-调试过-so-之后会在-data-data-app-目录中生成-server，似乎-data-local-tmp-目录下也会生成）" class="headerlink" title="启动 server（Android studio 调试过 so 之后会在 &#x2F;data&#x2F;data&#x2F;app 目录中生成 server，似乎 &#x2F;data&#x2F;local&#x2F;tmp 目录下也会生成）:"></a>启动 server（Android studio 调试过 so 之后会在 &#x2F;data&#x2F;data&#x2F;app 目录中生成 server，似乎 &#x2F;data&#x2F;local&#x2F;tmp 目录下也会生成）:</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">adb shell su</span><br><span class="line">/data/local/tmp/lldb-server platform --server --listen &quot;*:1234&quot; &amp;</span><br><span class="line">/data/local/lldb-server platform --server --listen &quot;*:1234&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="端口转发："><a href="#端口转发：" class="headerlink" title="端口转发："></a>端口转发：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb forward tcp:1234 tcp:1234</span><br></pre></td></tr></table></figure>
+
+<h2 id="选择-platform-连接-server"><a href="#选择-platform-连接-server" class="headerlink" title="选择 platform, 连接 server:"></a>选择 platform, 连接 server:</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">platform select remote-android</span><br><span class="line">platform connect ://:1234</span><br></pre></td></tr></table></figure>
+
+<h2 id="Attach-进程（首次附加可能会卡顿很久，因为复制-so-到本地或者传文件）："><a href="#Attach-进程（首次附加可能会卡顿很久，因为复制-so-到本地或者传文件）：" class="headerlink" title="Attach 进程（首次附加可能会卡顿很久，因为复制 so 到本地或者传文件）："></a>Attach 进程（首次附加可能会卡顿很久，因为复制 so 到本地或者传文件）：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">attach 1111</span><br></pre></td></tr></table></figure>
+
+<h2 id="查找关键字相关的命令-设置："><a href="#查找关键字相关的命令-设置：" class="headerlink" title="查找关键字相关的命令&#x2F;设置："></a>查找关键字相关的命令&#x2F;设置：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apropos xxx  // apropos Architecture  查找指令架构相关的命令/设置</span><br></pre></td></tr></table></figure>
+
+<h2 id="断点列表："><a href="#断点列表：" class="headerlink" title="断点列表："></a>断点列表：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">br l</span><br></pre></td></tr></table></figure>
+
+<h2 id="地址断点-thumb-指令时目标地址需要加一-："><a href="#地址断点-thumb-指令时目标地址需要加一-：" class="headerlink" title="地址断点 (thumb 指令时目标地址需要加一)："></a>地址断点 (thumb 指令时目标地址需要加一)：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">br s -a 0x4153a3c9                                      //breakpoint set -address</span><br></pre></td></tr></table></figure>
+
+<h2 id="方法名断点："><a href="#方法名断点：" class="headerlink" title="方法名断点："></a>方法名断点：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">br s -F time  // 完整名</span><br><span class="line">br s -n time  // 函数名，对于被名称粉碎的方法很方便</span><br></pre></td></tr></table></figure>
+
+<h2 id="给断点添加命令："><a href="#给断点添加命令：" class="headerlink" title="给断点添加命令："></a>给断点添加命令：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">br com add 1                                           //command add</span><br></pre></td></tr></table></figure>
+
+<h2 id="条件断点（很卡，不好使）"><a href="#条件断点（很卡，不好使）" class="headerlink" title="条件断点（很卡，不好使）:"></a>条件断点（很卡，不好使）:</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">br s -a 0x4153a3c9 -c &#x27;(int)strcmp($r1,&quot;getPayload&quot;) == 0&#x27;          //--condition</span><br></pre></td></tr></table></figure>
+
+<h2 id="内存断点-即使相同硬件，有些内核版本可能导致断点无效-："><a href="#内存断点-即使相同硬件，有些内核版本可能导致断点无效-：" class="headerlink" title="内存断点(即使相同硬件，有些内核版本可能导致断点无效)："></a>内存断点(即使相同硬件，有些内核版本可能导致断点无效)：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wa s e -s 1 -- 0x752D0004     // 在0x752D0004 地址设置监视长度为 1 的内存断点，写</span><br><span class="line">wa s e -w r -s 1 -- 0x76FE8040  // 读断点</span><br><span class="line">wa s e -w read_write -s 1 -- 0x7754c23d  // 读写断点</span><br></pre></td></tr></table></figure>
+
+<h2 id="寄存器："><a href="#寄存器：" class="headerlink" title="寄存器："></a>寄存器：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">re[gister] r[ead] r0 r1 </span><br><span class="line">re r -a[ll]</span><br></pre></td></tr></table></figure>
+
+<h2 id="查看内存："><a href="#查看内存：" class="headerlink" title="查看内存："></a>查看内存：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x 0x75cc6a68 -c256 </span><br><span class="line">x -s4 -fx -c4 0xbffff3c0                                    //--size 4 --format x --count 4</span><br><span class="line">x 0x7d242700 -fs --force --size 2600</span><br></pre></td></tr></table></figure>
+
+<h2 id="写内存："><a href="#写内存：" class="headerlink" title="写内存："></a>写内存：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">memory write 0x757df678 0xde 0x3a 0x30 f7 9c 18 0b f3</span><br></pre></td></tr></table></figure>
+
+<h2 id="显示汇编代码："><a href="#显示汇编代码：" class="headerlink" title="显示汇编代码："></a>显示汇编代码：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">di -s 0x759651f2</span><br><span class="line">di -s 0x759651f2 -A thumb 强制以 thumb 指令集反汇编</span><br></pre></td></tr></table></figure>
+
+<h2 id="单步："><a href="#单步：" class="headerlink" title="单步："></a>单步：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">si, ni, s, n  (实际上真正有效的 step-over 指令为 step -a True)</span><br></pre></td></tr></table></figure>
+
+<h2 id="执行到返回："><a href="#执行到返回：" class="headerlink" title="执行到返回："></a>执行到返回：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">finish</span><br></pre></td></tr></table></figure>
+
+<h2 id="模块列表："><a href="#模块列表：" class="headerlink" title="模块列表："></a>模块列表：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">image list</span><br></pre></td></tr></table></figure>
+
+<h2 id="跳过-8-字节："><a href="#跳过-8-字节：" class="headerlink" title="跳过 8 字节："></a>跳过 8 字节：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">register write pc `$pc+8`  (注意 ` 不是 ‘)</span><br></pre></td></tr></table></figure>
+
+<h2 id="强制中断："><a href="#强制中断：" class="headerlink" title="强制中断："></a>强制中断：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">process interrupt</span><br></pre></td></tr></table></figure>
+
+<h2 id="查看地址信息-相对模块的偏移-："><a href="#查看地址信息-相对模块的偏移-：" class="headerlink" title="查看地址信息 (相对模块的偏移)："></a>查看地址信息 (相对模块的偏移)：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">i[mage] loo[kup] --address 0x6be4d288</span><br></pre></td></tr></table></figure>
+
+<h2 id="读取内存到文件："><a href="#读取内存到文件：" class="headerlink" title="读取内存到文件："></a>读取内存到文件：</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">me read --force -b -o D:\tmp\stv_live_debug\ijkdump.so 0x802f4000 0x802f4000+0x7abf74</span><br><span class="line">me read --force -b -o D:\tmp\stv_live_debug\ytv_sm_enc_dump.so -b $r1 $r1+$r2</span><br></pre></td></tr></table></figure>
+
+<h2 id="添加-lldbinit-文件："><a href="#添加-lldbinit-文件：" class="headerlink" title="添加 .lldbinit 文件："></a>添加 .lldbinit 文件：</h2><p>在 C:\Users\Administrator 目录新建 .lldbinit 文件，里面加上要导入的脚本</p>
+<h2 id="lldbinit"><a href="#lldbinit" class="headerlink" title=".lldbinit"></a>.lldbinit</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 文件在 xxx/user/Administrator/ 目录</span><br><span class="line"></span><br><span class="line">script import os, sys</span><br><span class="line">command script import &quot;D:\Program files (x86)\LLVM\lldb_script\dis_capstone.py&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="读取保存的断点文件"><a href="#读取保存的断点文件" class="headerlink" title="读取保存的断点文件"></a>读取保存的断点文件</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">breakpoint read -f F:\aa\xx\yy.txt  // 注意不能像其他命令一样省略单词</span><br></pre></td></tr></table></figure>
+
+<h2 id="在-dlsym-下断"><a href="#在-dlsym-下断" class="headerlink" title="在 dlsym 下断"></a>在 dlsym 下断</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">br s -F __dl_dlsym</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Reverse-Engineering/" rel="tag"># Reverse Engineering</a>
+              <a href="/tags/Debugging/" rel="tag"># Debugging</a>
+              <a href="/tags/LLDB/" rel="tag"># LLDB</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+            </div>
+            <div class="post-nav-item">
+                <a href="/Dump-proxy-class-to-figure-out-how-Java-Spring-Configuration-proxyBeanMethods-works/" rel="next" title="Dump proxy class to figure out how Java Spring Configuration proxyBeanMethods works">
+                  Dump proxy class to figure out how Java Spring Configuration proxyBeanMethods works <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Wizdzz</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
